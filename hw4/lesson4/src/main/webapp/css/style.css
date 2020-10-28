@@ -1,0 +1,258 @@
+
+:root {
+    font-size: 16px;
+    font-family: Verdana, sans-serif;
+    color: rgb(34, 34, 34);
+
+    --border-color: rgb(185, 185, 185);
+    --boder: 1px solid var(--border-color);
+    --border-radius: 6px;
+    --caption-color: #3B5998;
+}
+
+html {
+    min-width: 800px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+header {
+    position: relative;
+}
+
+header .languages {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+header .enter-or-register-box {
+    position: absolute;
+    top: calc(24px + 0.5rem);
+    right: 0;
+}
+
+header nav {
+    border: var(--boder);
+    border-radius: var(--border-radius);
+    margin: 0.5rem 0 2rem 0;
+}
+
+header nav ul {
+    padding: 0;
+    margin: 1rem;
+}
+
+header nav ul li {
+    display: inline;
+    padding: 0;
+    margin: 0;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: black;
+    font-family: Arial, sans-serif;
+    margin-right: 1rem;
+}
+
+header nav ul li .cur-menu-item {
+    border-bottom: solid 4px #3b5998;
+}
+
+.middle {
+    display: flow-root;
+}
+
+aside {
+    float: right;
+    width: 20rem;
+}
+
+aside section {
+    border: var(--boder);
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    margin-bottom: 1rem;
+}
+
+aside section .header {
+    border-bottom: var(--boder);
+    padding: 0.25rem;
+    font-weight: bold;
+    color: var(--caption-color);
+}
+
+aside section .header:before {
+    content: "→ ";
+    font-size: 1.1rem;
+}
+
+aside section .body {
+    padding: 0.25rem;
+}
+
+aside section .footer {
+    border-top: var(--boder);
+    padding: 0.25rem;
+    text-align: right;
+    font-size: 0.8rem;
+}
+
+aside section .footer a:after {
+    content: " →";
+}
+
+main {
+    margin-right: 21rem;
+}
+
+footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: var(--boder);
+    text-align: center;
+}
+
+main .user-box {
+    border: var(--boder);
+    border-radius: var(--border-radius);
+}
+
+main .user-box .user-info {
+    display: inline-block;
+}
+
+main .user-box ul li {
+    margin-top: 0.3rem;
+}
+
+main .user-box .user-info .title {
+    padding-top: 0.3rem;
+    padding-left: 1rem;
+    font-size: x-large;
+}
+
+main .user-box img {
+    display: inline-block;
+    float: right;
+    margin-right: 5px;
+}
+
+main .user-navigation {
+    font-size: 2rem;
+}
+
+main .user-navigation .action-arrow {
+    display: inline-block;
+    text-decoration: none;
+    color: #543aef;
+}
+
+main .user-navigation .not-action-arrow {
+    display: inline-block;
+    text-decoration: none;
+    color: #ccc6c1;
+}
+
+
+main .datatable .caption {
+    background: #e1e1e1;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    padding: 0.2rem 0.4rem 0.2rem 0.4rem;
+}
+
+main .datatable table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+}
+
+main .datatable table thead tr th,
+main .datatable table tbody tr td {
+    border: 1px solid #e1e1e1;
+    padding: 0.4rem;
+    font-size: 0.8rem;
+}
+
+main .datatable table tbody tr:nth-child(odd)  {
+    background: #f8f8f8;
+}
+
+
+main article {
+    margin-bottom: 2rem;
+}
+
+main article .title {
+    text-decoration: none;
+    font-size: larger;
+    font-weight: bold;
+    color: var(--caption-color);
+}
+
+main article .information {
+    color: #aca3ab;
+    font-size: 0.8em;
+    padding-top: 0.2em;
+}
+
+main article .body {
+    font-size: 0.85em;
+    border-left: 4px solid #b9b9b9;
+    padding-left: 0.5rem;
+}
+
+main article .attachment {
+    list-style-image: url("./../img/paperclip-16x16.png");
+    font-size: 0.7rem;
+    padding-left: calc(17px + 0.3rem);
+}
+
+
+main article .footer {
+    position: relative;
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    height: 2.5em;
+    vertical-align: middle;
+}
+
+main article .footer .left {
+    position: absolute;
+    top: 0.45rem;
+    left: 1rem;
+    display: inline;
+    float: left;
+}
+
+
+main article .footer .right {
+    position: absolute;
+    top: 0.6rem;
+    right: 1rem;
+    display: inline;
+    float: right;
+    font-size: 0.8rem;
+}
+
+main article .footer .left .positive-score {
+    position: relative;
+    top:-0.2rem;
+    color: green;
+    font-size: larger;
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+main article .footer .right img {
+    position: relative;
+    top: 0.2rem;
+    margin-left: 5px;
+    margin-right: 5px;
+}
