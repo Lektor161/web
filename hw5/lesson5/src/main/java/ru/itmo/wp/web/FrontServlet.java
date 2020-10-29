@@ -100,15 +100,9 @@ public class FrontServlet extends HttpServlet {
 
         Method method = null;
         for (Class<?> clazz = pageClass; method == null && clazz != null; clazz = clazz.getSuperclass()) {
-            /*
-            try {
-                method = clazz.getDeclaredMethod(route.getAction(), HttpServletRequest.class, Map.class);
-            } catch (NoSuchMethodException ignored) {
-                // No operations.
-            }
-             */
             for (Method methodOfClazz : clazz.getDeclaredMethods()) {
-                if (route.getAction().equals(methodOfClazz.getName())) {
+                if (route.getAction().equals(methodOfClazz.getName()) ||
+                        (method == null || methodOfClazz.getParameterCount() < method.getParameterCount())) {
                     method = methodOfClazz;
                 }
             }
@@ -135,17 +129,14 @@ public class FrontServlet extends HttpServlet {
                 parameters[i] = view;
             } else if (methodParameterTypes[i].getName().equals(HttpServletRequest.class.getName())) {
                 parameters[i] = request;
+            } else {
+                throw new ServletException("unexpected [parameter type=" + methodParameterTypes[i].getName() +
+                        ", method=" + method + "]");
             }
         }
 
         try {
-            if (parameters.length == 0) {
-                method.invoke(page);
-            } else if (parameters.length == 1) {
-                method.invoke(page, parameters[0]);
-            } else if (parameters.length == 2) {
-                method.invoke(page, parameters[0], parameters[1]);
-            }
+            method.invoke(page, parameters);
         } catch (IllegalAccessException e) {
             throw new ServletException("Can't invoke action method [pageClass=" + pageClass + ", method=" + method + "]");
         } catch (InvocationTargetException e) {
@@ -158,22 +149,7 @@ public class FrontServlet extends HttpServlet {
                 throw new ServletException("Can't invoke action method [pageClass=" + pageClass + ", method=" + method + "]", cause);
             }
         }
-        /*
-        try {
-            method.invoke(page, request, view);
-        } catch (IllegalAccessException e) {
-            throw new ServletException("Can't invoke action method [pageClass=" + pageClass + ", method=" + method + "]");
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RedirectException) {
-                RedirectException redirectException = (RedirectException) cause;
-                response.sendRedirect(redirectException.getTarget());
-                return;
-            } else {
-                throw new ServletException("Can't invoke action method [pageClass=" + pageClass + ", method=" + method + "]", cause);
-            }
-        }
-*/
+
         String lang = (String) request.getSession().getAttribute("lang");
         String langSuffix = (lang == null || lang.equals("en")) ? "" : "_" + lang;
         Template template;
