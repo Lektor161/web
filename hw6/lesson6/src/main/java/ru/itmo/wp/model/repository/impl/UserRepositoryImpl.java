@@ -8,73 +8,49 @@ import ru.itmo.wp.model.repository.UserRepository;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
 
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl extends BasicRepositoryImpl<User> implements UserRepository {
     private final DataSource DATA_SOURCE = DatabaseUtils.getDataSource();
 
-    @Override
-    public User find(long id) {
-        try (Connection connection = DATA_SOURCE.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM User WHERE id=?")) {
-                statement.setLong(1, id);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    return toUser(statement.getMetaData(), resultSet);
-                }
-            }
-        } catch (SQLException e) {
-            throw new RepositoryException("Can't find User.", e);
-        }
+    public UserRepositoryImpl() {
+        super("User");
     }
 
     @Override
     public User findByLogin(String login) {
-        try (Connection connection = DATA_SOURCE.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM User WHERE login=?")) {
-                statement.setString(1, login);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    return toUser(statement.getMetaData(), resultSet);
+        return findByKey("login", login);
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return findByKey("email", email);
+    }
+
+    public User findByKeyAndPasswordSha(String key, String val, String passwordSha) {
+        return executeSQLQuery(
+                String.format("SELECT * FROM User WHERE %s=? AND passwordSha=?", key),
+                Arrays.asList(val, passwordSha),
+                statement -> {
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        return toModel(statement.getMetaData(), resultSet);
+                    }
                 }
-            }
-        } catch (SQLException e) {
-            throw new RepositoryException("Can't find User.", e);
-        }
+        );
     }
 
     @Override
     public User findByLoginAndPasswordSha(String login, String passwordSha) {
-        try (Connection connection = DATA_SOURCE.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM User WHERE login=? AND passwordSha=?")) {
-                statement.setString(1, login);
-                statement.setString(2, passwordSha);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    return toUser(statement.getMetaData(), resultSet);
-                }
-            }
-        } catch (SQLException e) {
-            throw new RepositoryException("Can't find User.", e);
-        }
+        return findByKeyAndPasswordSha("login", login, passwordSha);
     }
 
     @Override
-    public List<User> findAll() {
-        List<User> users = new ArrayList<>();
-        try (Connection connection = DATA_SOURCE.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM User ORDER BY id DESC")) {
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    User user;
-                    while ((user = toUser(statement.getMetaData(), resultSet)) != null) {
-                        users.add(user);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new RepositoryException("Can't find User.", e);
-        }
-        return users;
+    public User findByEmailAndPasswordSha(String email, String passwordSha) {
+        return findByKeyAndPasswordSha("email", email, passwordSha);
     }
 
-    private User toUser(ResultSetMetaData metaData, ResultSet resultSet) throws SQLException {
+    protected User toModel(ResultSetMetaData metaData, ResultSet resultSet) throws SQLException {
         if (!resultSet.next()) {
             return null;
         }
@@ -91,6 +67,8 @@ public class UserRepositoryImpl implements UserRepository {
                 case "creationTime":
                     user.setCreationTime(resultSet.getTimestamp(i));
                     break;
+                case "email":
+                    user.setEmail(resultSet.getString(i));
                 default:
                     // No operations.
             }
@@ -101,24 +79,23 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void save(User user, String passwordSha) {
-        try (Connection connection = DATA_SOURCE.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("INSERT INTO `User` (`login`, `passwordSha`, `creationTime`) VALUES (?, ?, NOW())", Statement.RETURN_GENERATED_KEYS)) {
-                statement.setString(1, user.getLogin());
-                statement.setString(2, passwordSha);
-                if (statement.executeUpdate() != 1) {
-                    throw new RepositoryException("Can't save User.");
-                } else {
-                    ResultSet generatedKeys = statement.getGeneratedKeys();
-                    if (generatedKeys.next()) {
-                        user.setId(generatedKeys.getLong(1));
-                        user.setCreationTime(find(user.getId()).getCreationTime());
-                    } else {
-                        throw new RepositoryException("Can't save User [no autogenerated fields].");
+        save(new HashMap<String, Object>(){{
+            put("login", user.getLogin());
+            put("email", user.getEmail());
+            put("passwordSha", passwordSha);
+        }}, user);
+    }
+
+    @Override
+    public int findCount() {
+        return executeSQLQuery(
+                "SELECT COUNT(*) FROM User",
+                statement -> {
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        resultSet.next();
+                        return resultSet.getInt(1);
                     }
                 }
-            }
-        } catch (SQLException e) {
-            throw new RepositoryException("Can't save User.", e);
-        }
+        );
     }
 }

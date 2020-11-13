@@ -3,18 +3,9 @@ package ru.itmo.wp.model.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-public class User implements Serializable {
-    private long id;
+public class User extends AbstractDomain implements Serializable {
     private String login;
-    private Date creationTime;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    private String email;
 
     public String getLogin() {
         return login;
@@ -24,11 +15,11 @@ public class User implements Serializable {
         this.login = login;
     }
 
-    public Date getCreationTime() {
-        return creationTime;
+    public String getEmail() {
+        return email;
     }
 
-    public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

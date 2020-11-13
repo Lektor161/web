@@ -15,7 +15,7 @@ public class UserService {
     private final UserRepository userRepository = new UserRepositoryImpl();
     private static final String PASSWORD_SALT = "177d4b5f2e4f4edafa7404533973c04c513ac619";
 
-    public void validateRegistration(User user, String password) throws ValidationException {
+    public void validateRegistration(User user, String password, String passwordConfirm) throws ValidationException {
         if (Strings.isNullOrEmpty(user.getLogin())) {
             throw new ValidationException("Login is required");
         }
@@ -29,9 +29,30 @@ public class UserService {
             throw new ValidationException("Login is already in use");
         }
 
+        if (Strings.isNullOrEmpty(user.getEmail())) {
+            throw new ValidationException("Email is required");
+        }
+
+        if (!user.getEmail().matches("[a-z.]+@[a-z.]+")) {
+            throw new ValidationException("Incorrect email");
+        }
+
+        if (userRepository.findByEmail(user.getEmail()) != null) {
+            throw new ValidationException("Email is already in use");
+        }
+
         if (Strings.isNullOrEmpty(password)) {
             throw new ValidationException("Password is required");
         }
+
+        if (Strings.isNullOrEmpty(passwordConfirm)) {
+            throw new ValidationException("Confirm password is required");
+        }
+
+        if (!password.equals(passwordConfirm)) {
+            throw new ValidationException("Password confirmation mismatched");
+        }
+
         if (password.length() < 4) {
             throw new ValidationException("Password can't be shorter than 4 characters");
         }
@@ -52,14 +73,29 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void validateEnter(String login, String password) throws ValidationException {
-        User user = userRepository.findByLoginAndPasswordSha(login, getPasswordSha(password));
+    public void validateEnter(String loginOrEmail, String password) throws ValidationException {
+        User user = userRepository.findByLoginAndPasswordSha(loginOrEmail, getPasswordSha(password));
         if (user == null) {
-            throw new ValidationException("Invalid login or password");
+            user = userRepository.findByEmailAndPasswordSha(loginOrEmail, getPasswordSha(password));
+        }
+        if (user == null) {
+            throw new ValidationException("Invalid login(email) or password");
         }
     }
 
-    public User findByLoginAndPassword(String login, String password) {
-        return userRepository.findByLoginAndPasswordSha(login, getPasswordSha(password));
+    public User findByLoginOrEmailAndPassword(String loginOrEmail, String password) {
+        User user = userRepository.findByLoginAndPasswordSha(loginOrEmail, getPasswordSha(password));
+        if (user == null) {
+            user = userRepository.findByEmailAndPasswordSha(loginOrEmail, getPasswordSha(password));
+        }
+        return user;
+    }
+
+    public User find(long userId) {
+        return userRepository.find(userId);
+    }
+
+    public int findCount() {
+        return userRepository.findCount();
     }
 }

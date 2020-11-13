@@ -33,6 +33,7 @@
         <ul>
             <li><a href="/index">Home</a></li>
             <li><a href="/users">Users</a></li>
+            <li><a href="/talks">Talks</a></li>
         </ul>
     </nav>
 </header>
@@ -59,8 +60,17 @@
     </main>
 </div>
 <footer>
+    <div>users count:${userCount!}</div>
     <a href="/index">Codeforces</a> &copy; 2020 by Mike Mirzayanov
 </footer>
 </body>
 </html>
 </#macro>
+
+<#function findBy items key value>
+    <#list items as item>
+        <#if item[key] == value>
+            <#return item/>
+        </#if>
+    </#list>
+</#function>

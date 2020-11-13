@@ -1,5 +1,7 @@
 <#-- @ftlvariable name="login" type="java.lang.String" -->
+<#-- @ftlvariable name="email" type="java.lang.String" -->
 <#-- @ftlvariable name="password" type="java.lang.String" -->
+<#-- @ftlvariable name="passwordConfirm" type="java.lang.String" -->
 <#-- @ftlvariable name="error" type="java.lang.String" -->
 <#import "commons.ftlh" as c>
 
@@ -19,10 +21,26 @@
                 </div>
                 <div class="field">
                     <div class="name">
+                        <label for="email">Email</label>
+                    </div>
+                    <div class="value">
+                        <input id="email" name="email" value="${name!}"/>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">
                         <label for="password">Password</label>
                     </div>
                     <div class="value">
                         <input id="password" name="password" type="password" value="${password!}"/>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">
+                        <label for="passwordConfirm">Confirm Password</label>
+                    </div>
+                    <div class="value">
+                        <input id="passwordConfirm" name="passwordConfirm" type="password" value="${passwordConfirm!}"/>
                     </div>
                 </div>
                 <#if error??>

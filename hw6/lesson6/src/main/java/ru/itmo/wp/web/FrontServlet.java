@@ -8,6 +8,7 @@ import ru.itmo.wp.web.exception.NotFoundException;
 import ru.itmo.wp.web.exception.RedirectException;
 import ru.itmo.wp.web.page.IndexPage;
 import ru.itmo.wp.web.page.NotFoundPage;
+import ru.itmo.wp.web.page.Page;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FrontServlet extends HttpServlet {
+
     private static final String BASE_PAGE_PACKAGE = FrontServlet.class.getName().substring(
             0, FrontServlet.class.getName().length() - FrontServlet.class.getSimpleName().length()
     ) + "page";
@@ -122,14 +124,9 @@ public class FrontServlet extends HttpServlet {
             throw new NotFoundException();
         }
 
-        Method method = null;
-        for (Class<?> clazz = pageClass; method == null && clazz != null; clazz = clazz.getSuperclass()) {
-            try {
-                method = pageClass.getDeclaredMethod(route.getAction(), HttpServletRequest.class, Map.class);
-            } catch (NoSuchMethodException ignored) {
-                // No operations.
-            }
-        }
+        Method before = findMethod(pageClass, "before", HttpServletRequest.class, Map.class);
+        Method method = findMethod(pageClass, route.getAction(), HttpServletRequest.class, Map.class);
+        Method after = findMethod(pageClass, "after", HttpServletRequest.class, Map.class);
 
         if (method == null) {
             throw new NotFoundException();
@@ -143,11 +140,13 @@ public class FrontServlet extends HttpServlet {
         }
 
         Map<String, Object> view = new HashMap<>();
-        putUser(request, view);
-
         try {
+            before.setAccessible(true);
             method.setAccessible(true);
+            after.setAccessible(true);
+            before.invoke(page, request, view);
             method.invoke(page, request, view);
+            after.invoke(page, request, view);
         } catch (IllegalAccessException e) {
             throw new ServletException("Unable to run action [pageClass=" + pageClass + ", method=" + method + "].", e);
         } catch (InvocationTargetException e) {
@@ -183,11 +182,16 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
-    private void putUser(HttpServletRequest request, Map<String, Object> view) {
-        User user = (User) request.getSession().getAttribute("user");
-        if (user != null) {
-            view.put("user", user);
+    private Method findMethod(Class<?> pageClass, String methodName, Class<?>... parameterType) {
+        Method method = null;
+        for (Class<?> clazz = pageClass; method == null && clazz != null; clazz = clazz.getSuperclass()) {
+            try {
+                method = clazz.getDeclaredMethod(methodName, parameterType);
+            } catch (NoSuchMethodException e) {
+                // No operations
+            }
         }
+        return method;
     }
 
     private static final class Route {
